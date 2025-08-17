@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   useSignInWithEmail,
   useEvmAddress,
@@ -84,7 +84,7 @@ export const useCoinbaseAuth = () => {
     }
   }, [currentUser, evmAddress])
 
-  const loginWithEmail = async (email: string) => {
+  const loginWithEmail = useCallback(async (email: string) => {
     setIsLoading(true)
     setError(null)
     setMessage(null)
@@ -101,7 +101,7 @@ export const useCoinbaseAuth = () => {
 
       if (result.message) {
         // Check if we got an OTP code instead of magic link
-        if (result.message.includes('code') || result.message.includes('OTP')) {
+        if (result.message.includes('code') || result.message.includes('OTP') || result.message.includes('verification')) {
           // Show OTP input instead
           setShowOTPInput(true)
           setCurrentFlowId(result.flowId)
@@ -119,10 +119,10 @@ export const useCoinbaseAuth = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [signInWithEmail])
 
-  const verifyOTP = async () => {
-    if (!otpCode.trim() || !currentFlowId) {
+  const verifyOTP = useCallback(async (code: string) => {
+    if (!code.trim() || !currentFlowId) {
       setError('Please enter the verification code')
       return
     }
@@ -131,12 +131,12 @@ export const useCoinbaseAuth = () => {
     setError(null)
 
     try {
-      console.log('🔐 Verifying OTP code:', otpCode, 'for flow:', currentFlowId)
+      console.log('🔐 Verifying OTP code:', code, 'for flow:', currentFlowId)
 
       // Use real Coinbase CDP OTP verification
       const verifyResult = await verifyEmailOTP({
         flowId: currentFlowId,
-        otp: otpCode
+        otp: code
       })
 
       console.log('🔐 OTP verification result:', verifyResult)
@@ -162,9 +162,9 @@ export const useCoinbaseAuth = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [verifyEmailOTP, currentFlowId, currentUser, evmAddress, isSignedIn])
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       console.log('🚪 Attempting to sign out')
       await signOut()
@@ -196,56 +196,44 @@ export const useCoinbaseAuth = () => {
       console.error('❌ Sign out error:', err)
       setError(`Failed to sign out: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
-  }
+  }, [signOut, currentUser, evmAddress, isSignedIn, user])
 
-  const connectWallet = async () => {
-    if (!user) {
-      setError('Please login first')
-      return
-    }
+  const updateOtpCode = useCallback((code: string) => {
+    setOtpCode(code)
+  }, [])
 
-    try {
-      // The wallet connection is handled automatically by Coinbase CDP
-      // Just wait for the evmAddress to be available
-      if (evmAddress) {
-        setMessage('Wallet connected successfully!')
-        setTimeout(() => setMessage(null), 3000)
-      }
-    } catch (err) {
-      console.error('❌ Wallet connection error:', err)
-      setError('Failed to connect wallet. Please try again.')
-    }
-  }
+  const updateMessage = useCallback((message: string | null) => {
+    setMessage(message)
+  }, [])
 
-  const handleAuthCallback = async (token: string) => {
-    try {
-      // In real implementation, this would verify the magic link token
-      // For now, the CDP hooks handle this automatically
-      console.log('🔗 Auth callback received:', token)
-    } catch (err) {
-      console.error('❌ Auth callback error:', err)
-      setError('Authentication failed. Please try again.')
-    }
-  }
+  const clearError = useCallback(() => {
+    setError(null)
+  }, [])
 
   return {
+    // Auth state
     user,
+    isConnected: user?.isConnected || false,
     isLoading,
     error,
     message,
-    setMessage,
+
+    // OTP flow
+    showOTPInput,
+    otpCode,
+    loginSuccess,
+
+    // Actions
     loginWithEmail,
+    verifyOTP,
     logout,
-    connectWallet,
-    handleAuthCallback,
-    isConnected: user?.isConnected || false,
+    setOtpCode: updateOtpCode,
+    setMessage: updateMessage,
+    clearError,
+
+    // CDP state for debugging
     cdpUser: currentUser,
     evmAddress,
     isSignedIn,
-    showOTPInput,
-    otpCode,
-    setOtpCode,
-    verifyOTP,
-    loginSuccess
   }
 }
