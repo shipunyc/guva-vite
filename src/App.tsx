@@ -2,7 +2,6 @@ import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Gen from './pages/Gen'
-import Chat from './pages/Chat'
 import Mining from './pages/Mining'
 
 function App() {
@@ -13,7 +12,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/gen" element={<Gen />} />
-          <Route path="/chat" element={<Chat />} />
           <Route path="/mining" element={<Mining />} />
         </Routes>
       </main>
