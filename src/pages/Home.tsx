@@ -28,6 +28,13 @@ const Home = () => {
 
   return (
     <div className="space-y-8">
+      {/* Page Header */}
+      <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Explore LoRA models from the community</h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Every LoRA model is a unique NFT. You can buy or rent them to use in your own image or video workflows.
+          </p>
+        </div>
 
       {/* Tags */}
       <div className="flex flex-wrap justify-center gap-3">
