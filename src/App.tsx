@@ -3,6 +3,7 @@ import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Gen from './pages/Gen'
 import Mining from './pages/Mining'
+import About from './pages/About'
 import Account from './pages/Account'
 import Create from './pages/Create'
 
@@ -15,6 +16,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/gen" element={<Gen />} />
           <Route path="/mining" element={<Mining />} />
+          <Route path="/about" element={<About />} />
           <Route path="/account" element={<Account />} />
           <Route path="/create" element={<Create />} />
         </Routes>

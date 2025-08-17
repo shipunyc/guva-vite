@@ -50,6 +50,7 @@ const Navbar = () => {
     { path: '/', label: 'Home' },
     { path: '/gen', label: 'Gen' },
     { path: '/mining', label: 'Mining' },
+    { path: '/about', label: 'About' },
   ]
 
   const handleMobileMenuToggle = () => {
